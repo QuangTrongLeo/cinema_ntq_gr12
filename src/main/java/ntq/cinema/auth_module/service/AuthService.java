@@ -53,64 +53,85 @@ public class AuthService {
         this.jwtMapper = jwtMapper;
     }
 
-    // ===== 1. TẠO TÀI KHOẢN =====
-    // 1.1. ĐĂNG KÝ TÀI KHOẢN BẰNG EMAIL
+    // ========== 1. TẠO TÀI KHOẢN ==========
+    // ===== 1.1. ĐĂNG KÝ TÀI KHOẢN BẰNG EMAIL =====
     public void register(RegisterRequest request) {
-        // 1.1.1. Kiểm tra email đăng ký đã tồn tại hay chưa
+        // 1.1.1. Kiểm tra User bằng email đã tồn tại trong DB chưa
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Tài khoản email này đã tồn tại !");
+            // Alternative Flows(1.1.1): Tài khoản bằng email đã tồn tại trong DB
+            throw new RuntimeException("Tài khoản bằng email này đã tồn tại!");
         }
 
-
-        // Tìm role CUSTOMER
+        // 1.1.2. Tìm Role với vai trò là CUSTOMER trong DB
         Role defaultCustomerRole = roleRepository.findByName(RoleTypeEnum.CUSTOMER)
+                // Alternative Flows(1.1.2): Vai trò CUSTOMER không tồn tại trong DB
                 .orElseThrow(() -> new RuntimeException("Vai trò CUSTOMER không tồn tại trong hệ thống"));
 
-        // Tạo user mới
+        // 1.1.3. Tạo User mới từ thông tin của request với trạng thái chưa kích hoạt
         User user = new User();
         user.setEmail(request.getEmail());
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-        user.setEnabled(false);
+        user.setEnabled(false); // chưa kích hoạt
 
-        // Tạo UserRole
+        // 1.1.4. Tạo UserRole và gán vai trò CUSTOMER cho user mới
         UserRole userRole = new UserRole();
         userRole.setUser(user);
         userRole.setRole(defaultCustomerRole);
 
-        // Gắn vào user
+        // 1.1.5. Thêm UserRole vào danh sách vai trò của user
         user.getUserRoles().add(userRole);
 
-        // Lưu user (sẽ cascade lưu luôn UserRole)
+        // 1.1.6. Lưu thông tin người dùng vào DB
         userRepository.save(user);
 
-        // Tạo và lưu OTP
+        // 1.1.7. Tạo mã OTP ngẫu nhiên và thiết lập thời gian hết hạn
         String otp = RandomOtpUtil.generateOtp();
         Timestamp now = new Timestamp(System.currentTimeMillis());
-        Timestamp expiry = Timestamp.from(Instant.now().plus(otpExpiryMinutes, ChronoUnit.MINUTES));
+        Timestamp expiry = Timestamp.from(Instant.now().plus(otpExpiryMinutes, ChronoUnit.MINUTES)); // 5 phút
         UserOtp userOtp = new UserOtp(user, otp, expiry, now);
+
+        // 1.1.8. Lưu mã Otp vào DB
         otpRepository.save(userOtp);
 
-        // Gửi OTP qua email
+        // 1.1.9. Gửi mã OTP tới email người dùng để xác thực tài khoản
         emailService.sendOtpEmail(user.getEmail(), otp);
     }
 
 
-    // 1.2. XÁC THỰC OTP
+    // ===== 1.2. XÁC THỰC OTP =====
     public void verifyOtp(VerifyOtpRequest request) {
+        // 1.2.1. Tìm mã OTP trong DB dựa theo email và mã OTP từ thông tin của request
         UserOtp otp = otpRepository.findByUserEmailAndOtpCode(request.getEmail(), request.getOtpCode());
+
+        // 1.2.2. Kiểm tra OTP có hợp lệ hay không:
+        // - Không tồn tại
+        // - Đã được sử dụng
+        // - Hoặc đã hết hạn
         if (otp == null || otp.isUsed() || otp.getExpiryTime().before(new Timestamp(System.currentTimeMillis()))) {
+            //Alternative Flows(1.2.2): OTP không hợp lệ hoặc đã hết hạn
             throw new RuntimeException("OTP không hợp lệ hoặc đã hết hạn");
         }
 
+        // 1.2.3. Đánh dấu OTP này đã được sử dụng
         otp.setUsed(true);
+
+        // 1.2.4. Lưu lại trạng thái OTP đã sử dụng vào DB
         otpRepository.save(otp);
 
-        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        // 1.2.5. Tìm User tương ứng với email để kích hoạt tài khoản
+        User user = userRepository.findByEmail(request.getEmail())
+                // Alternative Flows(1.2.5): User không được tìm thấy bằng email trong DB
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy user với email: " + request.getEmail()));
+
+        // 1.2.6. Kích hoạt tài khoản người dùng
         user.setEnabled(true);
+
+        // 1.2.7. Lưu lại trạng thái tài khoản đã được kích hoạt vào DB
         userRepository.save(user);
     }
+
 
     // ===== 2. ĐĂNG NHẬP =====
     public JwtResponse login(LoginRequest request) {

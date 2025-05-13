@@ -17,6 +17,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    // 1.1.9. Gửi mã OTP tới email người dùng để xác thực tài khoản
     public void sendOtpEmail(String toEmail, String otpCode) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(fromEmail);
