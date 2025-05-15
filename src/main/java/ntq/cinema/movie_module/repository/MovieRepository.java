@@ -10,4 +10,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findByStatus_NameOrderByMovieIdDesc(MovieStatusEnum status);
 
     List<Movie> findAllByOrderByMovieIdDesc();
+
+    List<Movie> findByTitleContainingIgnoreCaseOrderByMovieIdDesc(String title);
 }
