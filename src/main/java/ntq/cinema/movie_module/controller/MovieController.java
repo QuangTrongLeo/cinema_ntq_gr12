@@ -6,10 +6,7 @@ import ntq.cinema.movie_module.dto.response.movie.MovieResponse;
 import ntq.cinema.movie_module.entity.Movie;
 import ntq.cinema.movie_module.service.MovieService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,6 +19,16 @@ public class MovieController {
     @PostMapping("/user")
     public ResponseEntity<List<MovieResponse>> searchMovies(@RequestParam(required = false) String title) {
         List<MovieResponse> movieResponses = movieService.searchMovies(title);
+        return ResponseEntity.ok(movieResponses);
+    }
+
+
+//    4.2 Lọc phim theo thể loại
+    @PostMapping("/user/by-genre")
+    public ResponseEntity<List<MovieResponse>> searchMoviesByGenreName(@RequestParam String genre) {
+        //    4.2.1 Gọi service để xử lý logic lọc phim
+        List<MovieResponse> movieResponses = movieService.searchMoviesByGenreName(genre);
+        // 4.2.6 Trả kết quả danh sách phim phù hợp theo thể loại
         return ResponseEntity.ok(movieResponses);
     }
 }

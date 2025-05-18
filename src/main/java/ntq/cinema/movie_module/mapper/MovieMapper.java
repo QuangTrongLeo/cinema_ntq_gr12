@@ -30,6 +30,7 @@ public class MovieMapper {
                 .build();
     }
 
+    // 4.2.5 Hàm ánh xạ danh sách movie thành danh sách movieReponse
     public List<MovieResponse> mapperToResponseList(List<Movie> movies) {
         return movies.stream()
                 .map(this::mapperToResponse)  // Chuyển đổi từng Genre sang GenreResponse
