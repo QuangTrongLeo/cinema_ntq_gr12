@@ -16,9 +16,13 @@ import java.util.List;
 public class MovieController {
     private final MovieService movieService;
 
+    //4.1. Tìm kiếm phim theo tên
     @PostMapping("/user")
+    //Nhận yêu cầu tìm kiếm phim theo tên từ người dùng
     public ResponseEntity<List<MovieResponse>> searchMovies(@RequestParam(required = false) String title) {
+        //4.1.2. Gọi service để xử lý logic tìm kiếm phim theo tên
         List<MovieResponse> movieResponses = movieService.searchMovies(title);
+        //4.1.6. Trả kết quả danh sách phim phù hợp theo tên (nếu có)
         return ResponseEntity.ok(movieResponses);
     }
 
