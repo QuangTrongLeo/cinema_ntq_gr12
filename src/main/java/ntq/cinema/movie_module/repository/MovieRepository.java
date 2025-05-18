@@ -12,6 +12,7 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     List<Movie> findAllByOrderByMovieIdDesc();
 
+    //4.1.5. Nếu có tên phim, tìm kiếm tên phim có chứa ký tự tìm kiếm (không phân biệt hoa thường) và sắp xếp giảm dần
     List<Movie> findByTitleContainingIgnoreCaseOrderByMovieIdDesc(String title);
 
     // 4.2.4 Tìm danh sách phim theo thể loại, sắp xếp giảm dần theo id movie

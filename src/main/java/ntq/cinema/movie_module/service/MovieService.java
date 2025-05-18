@@ -37,15 +37,19 @@ public class MovieService {
         return movieRepository.findByStatus_NameOrderByMovieIdDesc(status);
     }
 
+    //4.1. Tìm kiếm phim theo tên
     public List<MovieResponse> searchMovies(String title){
         List<Movie> movies;
 
+        //4.1.3. Kiểm tra nếu tiêu đề chưa có hoặc rỗng
         if (title == null || title.trim().isEmpty()) {
+            //4.1.4. Nếu không có tên phim, lấy toàn bộ danh sách phim sắp xếp gia dần theo movieId
             movies = movieRepository.findAllByOrderByMovieIdDesc();
         } else {
+            //4.1.5. Nếu có tên phim, tìm kiếm tên phim có chứa ký tự tìm kiếm (không phân biệt hoa thường) và sắp xếp giảm dần
             movies = movieRepository.findByTitleContainingIgnoreCaseOrderByMovieIdDesc(title);
         }
-
+        //4.1.6. Chuyển danh sách entity movie thành movieResponse để trả ra ngoài
         return movieMapper.mapperToResponseList(movies);
     }
 
