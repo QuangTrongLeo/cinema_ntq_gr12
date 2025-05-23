@@ -58,16 +58,16 @@ public class AuthService {
     public void register(RegisterRequest request) {
         // 1.1.1. Kiểm tra User bằng email đã tồn tại trong DB chưa
         if (userRepository.existsByEmail(request.getEmail())) {
-            // Alternative Flows(1.1.1): Tài khoản bằng email đã tồn tại trong DB
+            // Alternative Flows(1.1.1): Tài khoản bằng email đã tồn tại
             throw new RuntimeException("Tài khoản bằng email này đã tồn tại!");
         }
 
         // 1.1.2. Tìm Role với vai trò là CUSTOMER trong DB
         Role defaultCustomerRole = roleRepository.findByName(RoleTypeEnum.CUSTOMER)
-                // Alternative Flows(1.1.2): Vai trò CUSTOMER không tồn tại trong DB
-                .orElseThrow(() -> new RuntimeException("Vai trò CUSTOMER không tồn tại trong hệ thống"));
+                // Alternative Flows(1.1.2): Vai trò CUSTOMER không tồn tại
+                .orElseThrow(() -> new RuntimeException("Vai trò CUSTOMER không tồn tại trong hệ thống!"));
 
-        // 1.1.3. Tạo User mới từ thông tin của request với trạng thái chưa kích hoạt
+        // 1.1.3. Tạo User mới từ request với trạng thái chưa kích hoạt tài khoản
         User user = new User();
         user.setEmail(request.getEmail());
         user.setUsername(request.getUsername());
