@@ -22,7 +22,7 @@ public class MovieController {
     public ResponseEntity<List<MovieResponse>> searchMovies(@RequestParam(required = false) String title) {
         //4.1.2. Gọi service để xử lý logic tìm kiếm phim theo tên
         List<MovieResponse> movieResponses = movieService.searchMovies(title);
-        //4.1.6. Trả kết quả danh sách phim phù hợp theo tên (nếu có)
+        //4.1.7. Trả kết quả danh sách phim phù hợp theo tên (nếu có)
         return ResponseEntity.ok(movieResponses);
     }
 
